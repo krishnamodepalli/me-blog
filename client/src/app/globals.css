@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* If no color-scheme is preferred */
+:root {
+  --primary-bg: #ebebeb;
+  --primary-text: #232323;
+
+  --skyblue: #98a6d4;
+
+  body {
+    background-color: var(--primary-bg);
+    color: var(--primary-text);
+    transition: 300ms background-color ease-in-out;
+  }
+}
+
+/* Light mode scheme */
+@media (prefers-color-scheme: light) {
+  :root {
+    --primary-bg: #edf5fd;
+    --primary-text: #232323;
+    --secondary-text: #5b5b5b;
+    --secondary-extra-text: #303030;
+    --dim-text: #c9d9e3;
+
+    --skyblue: #6f83c3;
+  }
+}
+
+/* Dark mode scheme */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary-bg: #191716;
+    --secondary-bg: #21201f;
+    --primary-text: #ededed;
+    --secondary-text: #8d8888;
+    --secondary-extra-text: #b1a9a9;
+
+    --dim-text: #313131;
+  }
+  body {
+    background-color: var(--primary-bg);
+    color: var(--primary-text);
+  }
+}
+
+#tagline::before {
+  content: "—";
+  margin: auto 5px;
+}
+
+/* some footer styles */
+footer {
+  .footer-link {
+    color: var(--secondary-text);
+    svg {
+      fill: var(--secondary-text);
+    }
+  }
+  .footer-link:hover {
+    color: var(--secondary-extra-text);
+    svg {
+      fill: var(--secondary-extra-text);
+    }
+    /* This is the only place where we are currently using the --secondary-extra-text */
+  }
+}
+
+/* The scroll bar */
+html::-webkit-scrollbar {
+  width: 12px;
+}
+html::-webkit-scrollbar-track {
+  background: var(--primary-bg);
+}
+html::-webkit-scrollbar-thumb {
+  background: var(--dim-text);
+  margin: 2px;
+}

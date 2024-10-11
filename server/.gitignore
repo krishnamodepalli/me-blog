@@ -1,0 +1,11 @@
+
+# my alias file which contains some aliases for the project
+.alias
+
+# ignore all the .env files
+.env.*
+# we want to include the .env.dev file to upload to some contents
+# !.env.dev
+
+dist/
+
