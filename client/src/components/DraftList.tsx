@@ -11,39 +11,49 @@ import Each from "./Each";
 import formatDate from "@/app/_utils/formatDate";
 import { IPostPreview } from "@/app/_types";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const PostPreview = ({
   id,
   title,
   createdAt,
+  posts,
   setPosts,
 }: {
   id: string;
   title: string;
   createdAt: string;
+  posts: IPostPreview[];
   setPosts: React.Dispatch<React.SetStateAction<IPostPreview[]>>;
 }) => {
   const date = formatDate(new Date(createdAt));
   const token = Cookies.get("token") as string;
 
   const handleDeleteDraft = useCallback(() => {
+    const deletedPost = posts.find((post) => post.id === id) as IPostPreview;
+    setPosts((prev) => prev.filter((post) => post.id !== id));
+
     axios
       .delete(`${process.env.NEXT_PUBLIC_API_URL}/draft/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => {
-        if (res.status === 200) {
-          setPosts((prev) => prev.filter((post) => post.id !== id));
-        }
+      .catch((err) => {
+        console.error("Cannot delete post", err);
+        toast.error("Cannot delete the draft.", {
+          theme: "colored",
+        });
+        setPosts((prev) => [...prev, deletedPost]);
       });
   }, [token, id, setPosts]);
 
   return (
     <div className="relative mb-4 flex w-full overflow-hidden rounded-lg bg-dim">
       <Link href={`/root/draft/${id}`} className="w-full px-8 py-4">
-        <h2 className="my-2 text-3xl font-semibold tracking-wider">{title}</h2>
+        <h2 className="my-2 text-3xl font-semibold tracking-wider">
+          {title || "Untitled.."}
+        </h2>
         <span className="italic text-ts">{date}</span>
       </Link>
       <div
@@ -98,7 +108,7 @@ const DraftList = () => {
         },
       },
     );
-    return data.drafts;
+    return data.drafts as IPostPreview[];
   }, [token]);
 
   useEffect(() => {
@@ -133,6 +143,7 @@ const DraftList = () => {
             id={item.id}
             title={item.title}
             createdAt={item.createdAt}
+            posts={posts}
             setPosts={setPosts}
           />
         )}

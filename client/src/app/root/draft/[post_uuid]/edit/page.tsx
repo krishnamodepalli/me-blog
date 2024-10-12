@@ -1,11 +1,16 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { toast } from "react-toastify";
+import Cookies from "js-cookie";
 
 import { jetbrains } from "@/app/_fonts";
+import getDraft from "@/app/_utils/getDraft";
+import { IDraft } from "@/app/_types";
 
 const Page = ({ params }: { params: { post_uuid: string } }) => {
   const { post_uuid } = params;
+  const token = Cookies.get("token") as string;
 
   const [editingData, setEditingData] = useState({
     title: "",
@@ -17,14 +22,21 @@ const Page = ({ params }: { params: { post_uuid: string } }) => {
     const draftData = JSON.parse(
       localStorage.getItem(`draft:${post_uuid}`) as string,
     );
-    const draft = draftData.draft;
+    let draft: IDraft;
+    if (draftData === null) {
+      getDraft(token, post_uuid).then((res) => {
+        setEditingData({ ...res });
+      });
+    } else {
+      draft = draftData.draft;
+      setEditingData({
+        title: draft.title,
+        content: draft.content,
+      });
+    }
 
     lastFetchedRef.current = draftData.lastFetched;
-    setEditingData({
-      title: draft.title,
-      content: draft.content,
-    });
-  }, [post_uuid]);
+  }, [token, post_uuid]);
 
   const timeoutRef = useRef<NodeJS.Timeout>();
 
@@ -37,7 +49,10 @@ const Page = ({ params }: { params: { post_uuid: string } }) => {
         lastFetched: lastFetchedRef.current,
       }),
     );
-    console.log("Auto-saved to localStorage");
+    toast.success("Saved to local.", {
+      theme: "colored",
+      autoClose: 1500,
+    });
   }, [editingData, post_uuid]);
 
   // effect to save for every 5 seconds after any change
@@ -49,7 +64,7 @@ const Page = ({ params }: { params: { post_uuid: string } }) => {
     // Set a new timeout for auto-saving
     timeoutRef.current = setTimeout(() => {
       saveToLocal();
-    }, 5000); // 5 seconds
+    }, 3000);
 
     return () => {
       if (timeoutRef.current) {
@@ -76,7 +91,7 @@ const Page = ({ params }: { params: { post_uuid: string } }) => {
           <textarea
             className="z-1 block h-16 w-full resize-none overflow-hidden bg-transparent outline-none placeholder:text-dim"
             value={editingData.title}
-            placeholder="Your title here..."
+            placeholder="Your title goes here..."
             onChange={(e) => {
               setEditingData((prev) => ({
                 title: e.target.value,
@@ -87,7 +102,7 @@ const Page = ({ params }: { params: { post_uuid: string } }) => {
           ></textarea>
         </div>
       </div>
-      <div className="mt-20 rounded-lg bg-dim" id="content">
+      <div className="mt-20 rounded-lg bg-sbackg" id="content">
         <textarea
           value={editingData.content}
           onChange={(e) => {

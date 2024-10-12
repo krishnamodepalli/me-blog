@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { ReactNode, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
+import getDraft from "@/app/_utils/getDraft";
 
 const Layout = ({
   children,
@@ -19,20 +20,9 @@ const Layout = ({
 
   // effect to fetch for the first time when opened the draft
   useEffect(() => {
-    console.log("Running useEffect in layout.");
-    console.log("fetch from database");
-    axios
-      .get(`${process.env.NEXT_PUBLIC_API_URL}/draft/${post_uuid}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+    getDraft(token, post_uuid)
       .then((res) => {
-        const draft = res.data.draft as {
-          title: string;
-          content: string;
-        };
-
+        const draft = res;
         localStorage.setItem(
           `draft:${post_uuid}`,
           JSON.stringify({

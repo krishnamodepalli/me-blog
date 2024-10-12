@@ -1,12 +1,22 @@
 "use client";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import Cookies from "js-cookie";
+
+import myMDParser from "@/app/_utils/markParser";
+
+import "highlight.js/styles/github-dark.min.css";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const Page = ({ params }: { params: { post_uuid: string } }) => {
   const { post_uuid } = params;
   const path = usePathname();
+  const router = useRouter();
 
+  const blogContentRef = useRef<HTMLDivElement | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [editingData, setEditingData] = useState<{
     title: string;
     content: string;
@@ -14,6 +24,14 @@ const Page = ({ params }: { params: { post_uuid: string } }) => {
     title: "",
     content: "",
   });
+
+  useEffect(() => {
+    const html = myMDParser.parse(editingData.content) as string;
+    const blogContentDiv = blogContentRef.current;
+    if (blogContentDiv) {
+      blogContentDiv.innerHTML = html;
+    }
+  }, [editingData]);
 
   useEffect(() => {
     const draftData = JSON.parse(
@@ -26,11 +44,43 @@ const Page = ({ params }: { params: { post_uuid: string } }) => {
     });
   }, [post_uuid]);
 
+  const publishPost = useCallback(() => {
+    const token = Cookies.get("token") as string;
+    setIsLoading(true);
+    axios
+      .post(
+        `${process.env.NEXT_PUBLIC_API_URL}/draft/publish/${post_uuid}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+      .then(() => {
+        toast.success("Your draft is successfully published.", {
+          theme: "colored",
+          autoClose: 3000,
+        });
+        setTimeout(() => {
+          router.push(`/`);
+        }, 4000);
+      })
+      .catch((err) => {
+        toast.error("Cannot publish the draft. Please try again later.", {
+          theme: "colored",
+          autoClose: 5000,
+        });
+        console.log(err);
+      })
+      .finally(() => setIsLoading(false));
+  }, [post_uuid, router]);
+
   return (
-    <div>
+    <div className="mb-40">
       <div id="title" className="mb-8">
         <div className="relative border-l-2 border-ts p-2 pl-4 text-6xl font-bold">
-          <p className="z-1 outline-none">{editingData.title}</p>
+          <p className="z-1 text-tp outline-none">{editingData.title}</p>
         </div>
       </div>
       <div className="my-4 flex justify-end">
@@ -49,7 +99,14 @@ const Page = ({ params }: { params: { post_uuid: string } }) => {
           Edit
         </Link>
       </div>
-      {editingData.content}
+      <div ref={blogContentRef} className="my-8" id="blog-content"></div>
+      <button
+        disabled={isLoading}
+        className="w-full rounded-none bg-skyblue py-4 text-2xl text-backg"
+        onClick={publishPost}
+      >
+        Publish
+      </button>
     </div>
   );
 };

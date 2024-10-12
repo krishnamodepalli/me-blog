@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 
+import { ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+
 import { raleway } from "./_fonts";
 import "./globals.css";
 
@@ -36,6 +39,7 @@ export default function RootLayout({
           className={`${raleway.className} relative m-auto min-h-[800px] max-w-[1000px] pt-20`}
         >
           {children}
+          <ToastContainer />
         </main>
       </body>
     </html>
