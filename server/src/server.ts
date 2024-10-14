@@ -1,10 +1,11 @@
 import express from "express";
 import CORS from "cors";
 
-import { Post, sync } from "./models";
 import authRouter from "./routes/auth";
 import postRouter from "./routes/post";
+import publicPostRouter from "./routes/publicPost";
 import draftRouter from "./routes/draft";
+
 import sequelize from "./sequelize";
 import authMiddleware from "./middleware/auth";
 
@@ -18,6 +19,7 @@ app.use(CORS());
 
 // routes
 app.use("/auth", authRouter);
+app.use("/post", publicPostRouter);
 app.use("/draft", authMiddleware, draftRouter);
 app.use("/post", authMiddleware, postRouter);
 

@@ -46,6 +46,7 @@ const PostPreview = ({
         });
         setPosts((prev) => [...prev, deletedPost]);
       });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, id, setPosts]);
 
   return (

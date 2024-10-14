@@ -10,3 +10,10 @@ export interface IDraft {
   title: string;
   content: string;
 }
+
+export interface IPost {
+  id: string;
+  bannerURL: string;
+  title: string;
+  content: string;
+}

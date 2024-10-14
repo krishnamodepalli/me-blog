@@ -42,7 +42,14 @@ const myMDParser = new Marked({
       return `<pre class="blog-codeblock"><code>${hl.value}</code></pre>`;
     },
     listitem({ tokens, task, checked }) {
-      const html = tokens.map(token => token.type === "list" ? this.list(token) : this.parser.parseInline([token])).join("");
+      const html = tokens
+        .map((token) =>
+          token.type === "list"
+            ? // @ts-expect-error This might bring an error, let's hope not.
+              this.list(token)
+            : this.parser.parseInline([token]),
+        )
+        .join("");
 
       return `<li class="blog-list-item">${task ? this.checkbox({ checked: checked || true }) : ""} ${html}</li>`;
     },
@@ -52,7 +59,6 @@ const myMDParser = new Marked({
       return `<${tag} class="blog-${tag}" start="${start}">${listItems}</${tag}>`;
     },
     checkbox({ checked }) {
-      console.log(checked);
       return `<input class="blog-checkbox" type="checkbox" ${checked ? "checked" : ""} disabled ></input>`;
     },
   },

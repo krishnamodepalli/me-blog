@@ -1,6 +1,7 @@
 // components/PostList.tsx
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 import Cookies from "js-cookie";
 
@@ -12,9 +13,11 @@ import { montserrat } from "@/app/_fonts";
 import axios from "axios";
 
 const PostPreview = ({
+  id,
   title,
   createdAt,
 }: {
+  id: string;
   title: string;
   createdAt: string;
 }) => {
@@ -22,7 +25,9 @@ const PostPreview = ({
 
   return (
     <div className="my-2 rounded-lg bg-dim px-8 py-6">
-      <h2 className="my-1 text-xl font-semibold tracking-wider">{title}</h2>
+      <Link href={`/post/${id}`}>
+        <h2 className="my-1 text-xl font-semibold tracking-wider">{title}</h2>
+      </Link>
       <span className={`${montserrat.className} italic tracking-wider text-ts`}>
         {date}
       </span>
@@ -104,6 +109,7 @@ const PostList = () => {
         of={posts}
         render={(item, index) => (
           <PostPreview
+            id={item.id}
             key={index}
             title={item.title}
             createdAt={item.createdAt}
