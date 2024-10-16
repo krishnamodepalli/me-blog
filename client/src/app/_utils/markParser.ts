@@ -1,6 +1,7 @@
 import { Marked } from "marked";
 import hls from "highlight.js";
 import { kebabCase } from "lodash";
+import { jetbrains } from "../_fonts";
 
 const myMDParser = new Marked({
   gfm: true,
@@ -33,13 +34,13 @@ const myMDParser = new Marked({
       return `<strong class="blog-strong">${html}</strong>`;
     },
     codespan({ text }) {
-      return `<code class="blog-codespan">${text}</code>`;
+      return `<code class="blog-codespan ${jetbrains.className}">${text}</code>`;
     },
     code({ text, lang }) {
       const hl = lang
         ? hls.highlight(text, { language: lang })
         : hls.highlightAuto(text);
-      return `<pre class="blog-codeblock"><code>${hl.value}</code></pre>`;
+      return `<pre class="blog-codeblock ${jetbrains.className}"><code>${hl.value}</code></pre>`;
     },
     listitem({ tokens, task, checked }) {
       const html = tokens

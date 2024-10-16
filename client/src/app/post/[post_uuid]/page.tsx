@@ -1,4 +1,3 @@
-import "highlight.js/styles/github-dark.min.css";
 
 import getAllPosts, { getPost } from "@/app/_utils/getPosts";
 import myMDParser from "../../_utils/markParser";
@@ -17,7 +16,7 @@ const PostPage = async ({ params }: { params: { post_uuid: string } }) => {
       <div
         className="my-8"
         id="blog-content"
-        dangerouslySetInnerHTML={{ __html: myMDParser.parse(post.content) }}
+        dangerouslySetInnerHTML={{ __html: myMDParser.parse(post.content || "") }}
       ></div>
     </div>
   );
