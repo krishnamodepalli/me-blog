@@ -5,6 +5,7 @@ import authRouter from "./routes/auth";
 import postRouter from "./routes/post";
 import publicPostRouter from "./routes/publicPost";
 import draftRouter from "./routes/draft";
+import statsRouter from "./routes/stats";
 
 import sequelize from "./sequelize";
 import authMiddleware from "./middleware/auth";
@@ -22,6 +23,7 @@ app.use("/auth", authRouter);
 app.use("/post", publicPostRouter);
 app.use("/draft", authMiddleware, draftRouter);
 app.use("/post", authMiddleware, postRouter);
+app.use("/api", statsRouter);
 
 app.listen(port, async () => {
   console.log("Server is fired up and running on port " + port);
