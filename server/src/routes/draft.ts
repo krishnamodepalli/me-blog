@@ -34,9 +34,22 @@ router.get("/:uuid", async (req: Request, res: Response) => {
     console.log("fetching from redis...");
     res.status(200).json({ msg: "OK", draft: result });
   } catch (error) {
-    res.status(500).json({
-      msg: "System has encountered some error, please try again later",
-    });
+    // if not found in redis, check for database
+    try {
+      const draft = (await Draft.findByPk(UUID)) as Draft;
+      const { title, content } = draft.dataValues;
+
+      await client.hset(`draft_key:${UUID}`, {
+        lastUpdated: Date.now().toString(),
+      });
+      await client.hset(`draft:${UUID}`, { title, content });
+      res.status(200).json({ msg: "OK", draft: { title, content } });
+    } catch (e) {
+      res.status(404).json({ msg: "Draft not found" });
+    }
+    res
+      .status(500)
+      .json({ msg: "Unable to fetch draft, please try again later. " });
     console.error("Error while sending a draft on GET request");
   }
 });
@@ -65,7 +78,7 @@ router.post("/new", async (req: Request, res: Response) => {
     // create a draft_key and also a draft
     try {
       await client.hset(`draft_key:${uuid}`, {
-        lastUpdated: Date.now(),
+        lastUpdated: Date.now().toString(),
       });
       await client.hset(`draft:${uuid}`, {
         title,
