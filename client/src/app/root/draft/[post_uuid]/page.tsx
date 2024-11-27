@@ -26,7 +26,7 @@ const Page = ({ params }: { params: { post_uuid: string } }) => {
   });
 
   useEffect(() => {
-    const html = myMDParser.parse(editingData.content) as string;
+    const html = myMDParser.parse(editingData.content || "") as string;
     const blogContentDiv = blogContentRef.current;
     if (blogContentDiv) {
       blogContentDiv.innerHTML = html;

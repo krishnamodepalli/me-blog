@@ -18,7 +18,7 @@ const Page = () => {
   const timeoutRef = useRef<NodeJS.Timeout>();
 
   const createDraft = useCallback(() => {
-    if (!editingData.title && !editingData.content) return;
+    if (editingData.title.length < 2 || editingData.content.length < 2) return;
     axios
       .post(`${process.env.NEXT_PUBLIC_API_URL}/draft/new`, editingData, {
         headers: {
@@ -29,8 +29,19 @@ const Page = () => {
         if (res.status === 200) {
           const { data } = res;
           const { post_id } = data;
+          localStorage.setItem(
+            `draft:${post_id}`,
+            JSON.stringify({
+              draft: editingData,
+              lastUpdated: Date.now().toString(),
+              lastFetched: Date.now().toString(),
+            }),
+          );
           router.push(`/root/draft/${post_id}/edit`);
         }
+      })
+      .catch((e) => {
+        console.error(e);
       });
   }, [token, editingData, router]);
 

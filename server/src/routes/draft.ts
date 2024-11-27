@@ -30,7 +30,7 @@ router.get("/all", async (req: Request, res: Response) => {
 router.get("/:uuid", async (req: Request, res: Response) => {
   const UUID = req.params.uuid as string;
   try {
-    const result = await client.hgetall(`drafts:${UUID}`);
+    const result = await client.hgetall(`draft:${UUID}`);
     console.log("fetching from redis...");
     res.status(200).json({ msg: "OK", draft: result });
   } catch (error) {
@@ -50,23 +50,43 @@ router.post("/new", async (req: Request, res: Response) => {
     content: string;
   };
 
+  /**
+   * Create a new key `draft_key:${uuid}` which only checks if we still have
+   * the draft in the redis cache database. This will have an expiration.
+   *
+   * We store the data inside another key, `draft:${uuid}`.
+   *
+   * The `draft_key:${uuid}` on expiration will delete the `draft:${uuid}`
+   */
   try {
     const draft = (await Draft.create({ title, content })) as Draft;
     const uuid = draft.dataValues.id as string;
 
-    await client.hset(`drafts:${uuid}`, {
-      title: title,
-      content: content,
-    });
-    res.status(200).json({
-      msg: "Draft created successfully",
-      post_id: draft.dataValues.id,
-    });
+    // create a draft_key and also a draft
+    try {
+      await client.hset(`draft_key:${uuid}`, {
+        lastUpdated: Date.now(),
+      });
+      await client.hset(`draft:${uuid}`, {
+        title,
+        content,
+      });
+      await client.expire(`draft_key:${uuid}`, 300);
+      res
+        .status(200)
+        .json({ msg: "Successfully created the draft.", post_id: uuid });
+    } catch (e) {
+      await draft.destroy();
+      res.status(500).json({
+        msg: "System has encountered some error, please try again later",
+      });
+      console.error("Cannot create draft in the REDIS cache database.\n", e);
+    }
   } catch (e) {
     res.status(500).json({
       msg: "System has encountered some error, please try again later",
     });
-    console.error("Error while creating a new Draft\n" + e);
+    console.error("Cannot create draft in the database:\n", e);
   }
 });
 
@@ -76,7 +96,7 @@ router.post("/publish/:uuid", async (req: Request, res: Response) => {
 
   // find the draft and then convert it into a post
   // get the latest data from the redis server
-  const redisDraft = await client.hgetall(`drafts:${uuid}`);
+  const redisDraft = await client.hgetall(`draft:${uuid}`);
   const draft = (await Draft.findByPk(uuid)) as Draft;
 
   if (redisDraft)
@@ -90,7 +110,7 @@ router.post("/publish/:uuid", async (req: Request, res: Response) => {
     await draft.convertToPost();
     res.status(200).json({ msg: "Successfully published the post." });
     // after this, we need to delete the draft from redis
-    await client.del(`drafts:${uuid}`);
+    await client.del(`draft:${uuid}`);
   } catch (e) {
     res
       .status(500)
@@ -106,7 +126,7 @@ router.put("/:uuid", async (req: Request, res: Response) => {
   const newContent = req.body.content as string;
 
   // first we need to connect to the `redis` and check if redis already have this draft.
-  const redis_res = await client.hset(`drafts:${UUID}`, {
+  const redis_res = await client.hset(`draft:${UUID}`, {
     title: newTitle,
     content: newContent,
   });
@@ -149,6 +169,13 @@ router.delete("/:uuid", async (req: Request, res: Response) => {
 
   try {
     draft?.destroy();
+    // also delete from REDIS, iff exists
+    try {
+      client.del(`draft_key:${UUID}`);
+      client.del(`draft:${UUID}`);
+    } catch (e) {
+      console.error(e);
+    }
     res.status(200).json({ msg: "Successfully deleted the draft." });
   } catch (err) {
     res.status(500).json({

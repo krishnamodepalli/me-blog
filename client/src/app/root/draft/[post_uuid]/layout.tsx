@@ -44,6 +44,8 @@ const Layout = ({
     const draftData = JSON.parse(
       localStorage.getItem(`draft:${post_uuid}`) as string,
     );
+    if (Object.keys(draftData).length === 0) return;
+
     const { lastUpdated, lastFetched } = draftData;
     const lastUpdatedTime = new Date(parseInt(lastUpdated));
     const lastFetchedTime = new Date(parseInt(lastFetched));

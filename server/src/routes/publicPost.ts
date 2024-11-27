@@ -15,8 +15,8 @@ const router = Router();
 
 // get some posts
 router.get("/all", async (req: Request, res: Response) => {
-  const page_no = parseInt(req.query.page_no as string);
-  const limit = parseInt(req.query.limit as string);
+  const page_no = parseInt((req.query.page_no || "1") as string);
+  const limit = parseInt((req.query.limit || "5") as string);
   const posts = await Post.findAll({
     attributes: ["id", "title", "createdAt"],
     limit,
