@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import { raleway } from "./_fonts";
 import "./globals.css";
+import "./blog-styles.css";
 import "./codeblock.css";
 
 export const metadata: Metadata = {

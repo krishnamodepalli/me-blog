@@ -87,7 +87,7 @@ const Page = ({ params }: { params: { post_uuid: string } }) => {
   return (
     <div className="relative pb-20">
       <div id="title" className="mb-8">
-        <div className="relative border-l-2 border-ts p-2 pl-4 text-6xl font-bold">
+        <div className="relative border-l-2 border-t2 p-2 pl-4 text-6xl font-bold">
           <textarea
             className="z-1 block h-16 w-full resize-none overflow-hidden bg-transparent outline-none placeholder:text-dim"
             value={editingData.title}
@@ -102,7 +102,7 @@ const Page = ({ params }: { params: { post_uuid: string } }) => {
           ></textarea>
         </div>
       </div>
-      <div className="mt-20 rounded-lg bg-sbackg" id="content">
+      <div className="mt-20 rounded-lg bg-bg2" id="content">
         <textarea
           value={editingData.content}
           onChange={(e) => {
@@ -111,7 +111,7 @@ const Page = ({ params }: { params: { post_uuid: string } }) => {
               content: e.target.value,
             }));
           }}
-          className={`block h-auto min-h-[30rem] w-full resize-y bg-transparent px-6 py-8 text-lg text-tp outline-none ${jetbrains.className}`}
+          className={`block h-auto min-h-[30rem] w-full resize-y bg-transparent px-6 py-8 text-lg text-t1 outline-none ${jetbrains.className}`}
         ></textarea>
       </div>
     </div>

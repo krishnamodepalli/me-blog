@@ -9,7 +9,7 @@ interface IHeading {
 const Heading = ({ children, className }: IHeading) => {
   return (
     <h1
-      className={`${className} ${montserrat.className} mb-20 text-center tracking-widest lg:text-[3rem] dark:text-skyblue`}
+      className={`${className} ${montserrat.className} mb-20 text-center tracking-widest lg:text-[3rem] dark:text-primary`}
     >
       {children}
     </h1>

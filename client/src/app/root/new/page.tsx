@@ -52,9 +52,9 @@ const Page = () => {
   return (
     <div className="relative pb-20">
       <div id="title" className="mb-8">
-        <div className="relative border-l-2 border-ts p-2 pl-4 text-6xl font-bold">
+        <div className="relative border-l-2 border-t2 p-2 pl-4 text-6xl font-bold">
           <textarea
-            className="z-1 block h-16 w-full resize-none overflow-hidden bg-transparent outline-none placeholder:text-dim"
+            className="z-1 placeholder:text-dim block h-16 w-full resize-none overflow-hidden bg-transparent outline-none"
             placeholder="Your title goes here..."
             value={editingData.title}
             onChange={(e) =>
@@ -66,9 +66,9 @@ const Page = () => {
           ></textarea>
         </div>
       </div>
-      <div className="bg-sbackg mt-20 rounded-lg" id="content">
+      <div className="mt-20 rounded-lg bg-bg2" id="content">
         <textarea
-          className={`block h-auto min-h-[30rem] w-full resize-y bg-transparent px-6 py-8 text-lg text-tp outline-none ${jetbrains.className}`}
+          className={`block h-auto min-h-[30rem] w-full resize-y bg-transparent px-6 py-8 text-lg text-t1 outline-none ${jetbrains.className}`}
           value={editingData.content}
           onChange={(e) =>
             setEditingData((prev) => ({

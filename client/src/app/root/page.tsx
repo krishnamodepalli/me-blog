@@ -11,7 +11,7 @@ const RootPage = () => {
       <div className="absolute bottom-8 flex w-full flex-col gap-12 lg:flex-row-reverse">
         <Link
           href="/root/new"
-          className="flex items-center justify-center gap-4 border-2 border-transparent bg-skyblue py-3 text-2xl font-semibold text-backg shadow-lg outline-offset-2 transition-all duration-300 lg:w-full"
+          className="flex items-center justify-center gap-4 border-2 border-transparent bg-primary py-3 text-2xl font-semibold text-bg1 shadow-lg outline-offset-2 transition-all duration-300 lg:w-full"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -24,8 +24,8 @@ const RootPage = () => {
           Draft New Post
         </Link>
         <Link
-          className="flex items-center justify-center border-2 border-tp bg-transparent py-3 text-2xl font-semibold text-ts shadow-lg outline-offset-2 transition-all duration-300 hover:border-transparent hover:bg-skyblue hover:text-backg focus:bg-skyblue focus:text-backg lg:w-full"
           href="/root/draft"
+          className="flex items-center justify-center border-2 border-t1 bg-transparent py-3 text-2xl font-semibold text-t2 shadow-lg outline-offset-2 transition-all duration-300 hover:border-transparent hover:bg-primary hover:text-bg1 focus:bg-primary focus:text-bg1 lg:w-full"
         >
           Go to Drafts
         </Link>

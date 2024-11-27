@@ -13,7 +13,7 @@ const NavLink: FC<INavLink> = ({ href, children }) => {
     <li className="ml-6">
       <Link
         href={href}
-        className={`${raleway.className} text-lg font-semibold tracking-wider hover:text-skyblue hover:underline`}
+        className={`${raleway.className} text-lg font-semibold tracking-wider hover:text-primary hover:underline`}
       >
         {children}
       </Link>

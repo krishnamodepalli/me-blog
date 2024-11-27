@@ -9,14 +9,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        backg: "var(--bg-main-col)",
-        sbackg: "var(--bg-sub-col)",
-        tp: "var(--text-main-col)",
-        ts: "var(--text-sub-col)",
-        tse: "var(--secondary-extra-text)",
-        dim: "var(--dim-text)",
+        primary: "var(--primary-col)",
 
-        skyblue: "var(--primary-col)",
+        t1: "var(--text-level-1)",
+        t2: "var(--text-level-2)",
+        t3: "var(--text-level-3)",
+        t4: "var(--text-level-4)",
+
+        bg1: "var(--bg-level-1)",
+        bg2: "var(--bg-level-2)",
+        bg3: "var(--bg-level-3)",
+        bg4: "var(--bg-level-4)",
       },
     },
   },

@@ -6,7 +6,7 @@ const Page = async () => {
   return (
     <>
       <h1
-        className={`my-12 text-[3rem] text-skyblue ${montserrat.className} text-center`}
+        className={`my-12 text-[3rem] text-primary ${montserrat.className} text-center`}
       >
         Your Drafts
       </h1>

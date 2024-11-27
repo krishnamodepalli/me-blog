@@ -1,4 +1,3 @@
-
 import getAllPosts, { getPost } from "@/app/_utils/getPosts";
 import myMDParser from "../../_utils/markParser";
 
@@ -10,7 +9,7 @@ const PostPage = async ({ params }: { params: { post_uuid: string } }) => {
     <div className="mb-60">
       <div id="title" className="mb-20">
         <div className="relative p-2 pl-4 text-6xl font-bold">
-          <p className="z-1 text-tp outline-none">{post.title}</p>
+          <p className="z-1 text-t1 outline-none">{post.title}</p>
         </div>
       </div>
       <div

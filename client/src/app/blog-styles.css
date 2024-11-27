@@ -5,20 +5,20 @@
 .blog-heading1 {
   font-size: 2.5rem;
   font-weight: 600;
-  color: var(--text-main-col);
+  color: var(--text-level-1);
   margin-bottom: 3.5rem;
 }
 .blog-heading2 {
   font-size: 1.8rem;
   font-weight: 500;
-  color: var(--text-main-col);
+  color: var(--text-level-2);
 }
 .blog-para {
   margin-top: 3rem;
   letter-spacing: 0.6px;
   word-spacing: 0.15rem;
   line-height: 2.2rem;
-  color: var(--text-sub-col);
+  color: var(--text-level-4);
 }
 .blog-anchor {
   text-decoration: none;
@@ -38,7 +38,7 @@
   font-weight: 700;
 }
 .blog-codespan {
-  background-color: var(--bg-sub-col);
+  background-color: var(--bg-level-2);
   padding: 0px 6px;
   margin: 0 2px;
   border-radius: 5px;
@@ -47,18 +47,18 @@
 .blog-codeblock {
   border: none;
   border-radius: 6px;
-  background-color: var(--bg-sub-col);
+  background-color: var(--bg-level-2);
   padding: 1rem 1.5rem;
   margin: 3rem 0 1rem;
 }
 .blog-ol {
   list-style: decimal;
   margin: 4rem 0 0;
-  color: var(--text-sub-col);
+  color: var(--text-level-4);
 }
 .blog-ul {
   margin: 4rem 0 0;
-  color: var(--text-sub-col);
+  color: var(--text-level-4);
   list-style: disc;
   word-spacing: 0.15rem;
   .blog-ul {

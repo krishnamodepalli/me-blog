@@ -24,11 +24,11 @@ const PostPreview = ({
   const date = formatDate(new Date(createdAt));
 
   return (
-    <div className="my-2 rounded-lg bg-dim px-8 py-6">
+    <div className="bg-bg2 my-2 rounded-lg px-8 py-6">
       <Link href={`/post/${id}`}>
         <h2 className="my-1 text-xl font-semibold tracking-wider">{title}</h2>
       </Link>
-      <span className={`${montserrat.className} italic tracking-wider text-ts`}>
+      <span className={`${montserrat.className} italic tracking-wider text-t2`}>
         {date}
       </span>
     </div>
@@ -83,15 +83,15 @@ const PostList = () => {
   if (loading && page === 1) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="box-border w-full animate-pulse rounded-lg bg-neutral-800 p-8">
-          <span className="inline-block h-10 w-7/12 animate-pulse rounded-lg bg-neutral-700"></span>
+        <div className="box-border w-full animate-pulse rounded-lg bg-bg2 p-8">
+          <span className="inline-block h-10 w-7/12 animate-pulse rounded-lg bg-bg3"></span>
           <ul>
             {
               <Each
                 of={[0, 1]}
                 render={(_, index) => (
                   <li
-                    className="my-2 h-4 w-10/12 animate-pulse rounded-md bg-neutral-700"
+                    className="my-2 h-4 w-10/12 animate-pulse rounded-md bg-bg3"
                     key={index}
                   ></li>
                 )}
@@ -118,15 +118,15 @@ const PostList = () => {
       />
 
       {loading && page > 1 && (
-        <div className="box-border w-full animate-pulse rounded-lg bg-neutral-800 p-8">
-          <span className="inline-block h-10 w-7/12 animate-pulse rounded-lg bg-neutral-700"></span>
+        <div className="box-border w-full animate-pulse rounded-lg bg-bg2 p-8">
+          <span className="inline-block h-10 w-7/12 animate-pulse rounded-lg bg-bg3"></span>
           <ul>
             {
               <Each
                 of={[0, 1]}
                 render={(_, index) => (
                   <li
-                    className="my-2 h-4 w-10/12 animate-pulse rounded-md bg-neutral-700"
+                    className="my-2 h-4 w-10/12 animate-pulse rounded-md bg-bg3"
                     key={index}
                   ></li>
                 )}
