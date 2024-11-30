@@ -115,7 +115,7 @@ const DraftList = () => {
       setLoading(true);
       try {
         const { data } = await root_api("/draft/all");
-        setDrafts((data.data as IPostPreview[]) || []);
+        setDrafts((data.drafts as IPostPreview[]) || []);
       } catch (e) {
         toast.error(
           "Cannot fetch the drafts. Somethings not working at the server.",
