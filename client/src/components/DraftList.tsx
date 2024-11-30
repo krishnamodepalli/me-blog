@@ -11,6 +11,7 @@ import formatDate from "@/app/_utils/formatDate";
 import { IPostPreview } from "@/app/_types";
 import { toast } from "react-toastify";
 import { root_api } from "@/app/_utils/apis";
+import myMDParser from "@/app/_utils/markParser";
 
 const DraftPreview = ({
   id,
@@ -41,7 +42,7 @@ const DraftPreview = ({
     <div className="relative mb-4 flex w-full overflow-hidden rounded-lg bg-bg2 text-t4">
       <Link href={`/root/draft/${id}`} className="w-full px-8 py-4">
         <h2 className="my-2 text-3xl font-semibold tracking-wider text-t1">
-          {title || "Untitled.."}
+          {(myMDParser.parseInline(title) as string) || "Untitled.."}
         </h2>
         <span className="italic text-t2">{date}</span>
       </Link>

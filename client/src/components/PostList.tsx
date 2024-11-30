@@ -11,6 +11,7 @@ import formatDate from "@/app/_utils/formatDate";
 import { IPostPreview } from "@/app/_types";
 import { montserrat } from "@/app/_fonts";
 import axios from "axios";
+import myMDParser from "@/app/_utils/markParser";
 
 const PostPreview = ({
   id,
@@ -24,7 +25,7 @@ const PostPreview = ({
   const date = formatDate(new Date(createdAt));
 
   return (
-    <div className="bg-bg2 my-2 rounded-lg px-8 py-6">
+    <div className="my-2 rounded-lg bg-bg2 px-8 py-6">
       <Link href={`/post/${id}`}>
         <h2 className="my-1 text-xl font-semibold tracking-wider">{title}</h2>
       </Link>
@@ -111,7 +112,7 @@ const PostList = () => {
           <PostPreview
             id={item.id}
             key={index}
-            title={item.title}
+            title={myMDParser.parseInline(item.title) as string}
             createdAt={item.createdAt}
           />
         )}
