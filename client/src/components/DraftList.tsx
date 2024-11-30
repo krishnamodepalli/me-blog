@@ -1,53 +1,41 @@
-// components/DraftList.tsx
 "use client";
 
 import Link from "next/link";
 import React, { useEffect, useState, useCallback } from "react";
-import Cookies from "js-cookie";
 import { Tooltip } from "react-tooltip";
 
-import Each from "./Each";
+import Each from "./utils/Each";
+import { fireConfirmationDialog } from "./utils/ConfirmationDialog";
 
 import formatDate from "@/app/_utils/formatDate";
 import { IPostPreview } from "@/app/_types";
-import axios from "axios";
 import { toast } from "react-toastify";
+import { root_api } from "@/app/_utils/apis";
 
-const PostPreview = ({
+const DraftPreview = ({
   id,
   title,
   createdAt,
-  posts,
-  setPosts,
+  deleteDraft,
 }: {
   id: string;
   title: string;
   createdAt: string;
-  posts: IPostPreview[];
-  setPosts: React.Dispatch<React.SetStateAction<IPostPreview[]>>;
+  deleteDraft: (id: string) => void;
 }) => {
   const date = formatDate(new Date(createdAt));
-  const token = Cookies.get("token") as string;
 
   const handleDeleteDraft = useCallback(() => {
-    const deletedPost = posts.find((post) => post.id === id) as IPostPreview;
-    setPosts((prev) => prev.filter((post) => post.id !== id));
-
-    axios
-      .delete(`${process.env.NEXT_PUBLIC_API_URL}/draft/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .catch((err) => {
-        console.error("Cannot delete post", err);
-        toast.error("Cannot delete the draft.", {
-          theme: "colored",
-        });
-        setPosts((prev) => [...prev, deletedPost]);
-      });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, id, setPosts]);
+    fireConfirmationDialog({
+      prompt: "Are you sure to delete this draft?",
+      subPrompt: "This action cannot be undone!!",
+      confirmLabel: "Delete",
+      cancelLabel: "Cancel",
+      onConfirm: () => deleteDraft(id),
+      theme: "danger",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="relative mb-4 flex w-full overflow-hidden rounded-lg bg-bg2 text-t4">
@@ -95,33 +83,50 @@ const LoadingDraft = () => (
 );
 
 const DraftList = () => {
-  const token = Cookies.get("token") as string;
-
-  const [posts, setPosts] = useState<IPostPreview[]>([]);
+  const [drafts, setDrafts] = useState<IPostPreview[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchDrafts = useCallback(async () => {
-    const { data } = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/draft/all`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
+  const deleteDraft = useCallback(async (draft_id: string) => {
+    const draftToDelete = drafts.find((draft) => draft.id === draft_id);
+    if (!draftToDelete) return;
+
+    setDrafts((prev) => prev.filter((draft) => draft.id !== draft_id));
+    toast.promise(root_api.delete(`/draft/${draft_id}`), {
+      pending: "Deleting the draft",
+      error: {
+        render({ data }) {
+          console.log(data);
+          setDrafts((prev) => [...prev, draftToDelete]);
+          return "Cannot delete the draft, please try again";
         },
       },
-    );
-    return data.drafts as IPostPreview[];
-  }, [token]);
+      success: {
+        render() {
+          return "Deleted the draft successfully";
+        },
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const loadPosts = async () => {
       setLoading(true);
-      const newPosts = (await fetchDrafts()) as IPostPreview[];
-      setPosts(newPosts);
-      setLoading(false);
+      try {
+        const { data } = await root_api("/draft/all");
+        setDrafts((data.data as IPostPreview[]) || []);
+      } catch (e) {
+        toast.error(
+          "Cannot fetch the drafts. Somethings not working at the server.",
+        );
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadPosts();
-  }, [fetchDrafts]);
+  }, []);
 
   if (loading) {
     return (
@@ -137,15 +142,14 @@ const DraftList = () => {
   return (
     <div>
       <Each
-        of={posts || []}
+        of={drafts || []}
         render={(item, index) => (
-          <PostPreview
+          <DraftPreview
             key={index}
             id={item.id}
             title={item.title}
             createdAt={item.createdAt}
-            posts={posts}
-            setPosts={setPosts}
+            deleteDraft={deleteDraft}
           />
         )}
       />

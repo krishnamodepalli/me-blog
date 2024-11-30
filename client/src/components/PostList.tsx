@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 import Cookies from "js-cookie";
 
-import Each from "./Each";
+import Each from "./utils/Each";
 
 import formatDate from "@/app/_utils/formatDate";
 import { IPostPreview } from "@/app/_types";
