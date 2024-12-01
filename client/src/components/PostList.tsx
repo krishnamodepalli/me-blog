@@ -27,7 +27,12 @@ const PostPreview = ({
   return (
     <div className="my-2 rounded-lg bg-bg2 px-8 py-6">
       <Link href={`/post/${id}`}>
-        <h2 className="my-1 text-xl font-semibold tracking-wider">{title}</h2>
+        <h2
+          className="my-1 text-xl font-semibold tracking-wider"
+          dangerouslySetInnerHTML={{
+            __html: myMDParser.parseInline(title) || "",
+          }}
+        ></h2>
       </Link>
       <span className={`${montserrat.className} italic tracking-wider text-t2`}>
         {date}
@@ -112,7 +117,7 @@ const PostList = () => {
           <PostPreview
             id={item.id}
             key={index}
-            title={myMDParser.parseInline(item.title) as string}
+            title={item.title}
             createdAt={item.createdAt}
           />
         )}
