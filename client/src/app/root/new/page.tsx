@@ -5,6 +5,7 @@ import Cookies from "js-cookie";
 
 import { jetbrains } from "@/app/_fonts";
 import { useCallback, useEffect, useState, useRef } from "react";
+import { addDraft } from "@/app/_utils/storage";
 
 const Page = () => {
   const router = useRouter();
@@ -29,14 +30,13 @@ const Page = () => {
         if (res.status === 200) {
           const { data } = res;
           const { post_id } = data;
-          localStorage.setItem(
-            `draft:${post_id}`,
-            JSON.stringify({
-              draft: editingData,
-              lastUpdated: Date.now().toString(),
-              lastFetched: Date.now().toString(),
-            }),
-          );
+          addDraft({
+            id: post_id,
+            title: editingData.title,
+            content: editingData.content,
+            createdAt: new Date().toUTCString(),
+            updatedAt: new Date().toUTCString(),
+          });
           router.push(`/root/draft/${post_id}/edit`);
         }
       })

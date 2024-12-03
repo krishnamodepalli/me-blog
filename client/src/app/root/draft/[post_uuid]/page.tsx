@@ -1,14 +1,15 @@
 "use client";
-import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import axios from "axios";
 import Cookies from "js-cookie";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import { toast } from "react-toastify";
 
 import myMDParser from "@/app/_utils/markParser";
 
 import "highlight.js/styles/github-dark.min.css";
-import axios from "axios";
-import { toast } from "react-toastify";
 
 const Page = ({ params }: { params: { post_uuid: string } }) => {
   const { post_uuid } = params;
@@ -34,9 +35,9 @@ const Page = ({ params }: { params: { post_uuid: string } }) => {
   }, [editingData]);
 
   useEffect(() => {
-    const draftData = JSON.parse(
-      localStorage.getItem(`draft:${post_uuid}`) as string,
-    );
+    const draftData =
+      JSON.parse(localStorage.getItem(`draft:${post_uuid}`) as string) || {};
+    if (Object.keys(draftData).length === 0) return;
     const draft = draftData.draft;
     setEditingData({
       title: draft.title,
@@ -80,7 +81,12 @@ const Page = ({ params }: { params: { post_uuid: string } }) => {
     <div className="mb-40">
       <div id="title" className="mb-8">
         <div className="relative border-l-2 border-t2 p-2 pl-4 text-6xl font-bold">
-          <p className="z-1 text-t1 outline-none">{editingData.title}</p>
+          <p
+            className="z-1 text-t1 outline-none"
+            dangerouslySetInnerHTML={{
+              __html: editingData.title,
+            }}
+          ></p>
         </div>
       </div>
       <div className="my-4 flex justify-end">

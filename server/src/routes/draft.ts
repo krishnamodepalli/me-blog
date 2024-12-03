@@ -2,6 +2,14 @@ import { Router, Request, Response } from "express";
 
 import { client } from "../lib/db";
 import { Draft } from "../models";
+import {
+  RCasual,
+  RGAllDrafts,
+  RGDraft,
+  RGDraftUpdatedAt,
+  RPNewDraft,
+} from "../types/response";
+import { IDraftDetails, IDraftPreview } from "../types";
 
 const router = Router();
 
@@ -13,11 +21,12 @@ const router = Router();
  *  4. Delete a draft
  */
 
-router.get("/all", async (req: Request, res: Response) => {
+router.get("/all", async (req: Request, res: Response<RGAllDrafts>) => {
   try {
     const result = (await Draft.findAll({
       attributes: ["id", "title", "createdAt"],
-    })) as Draft[];
+    })) as unknown as IDraftPreview[];
+
     res.status(200).json({
       msg: "Successfully fetched all the drafts",
       drafts: result,
@@ -27,11 +36,12 @@ router.get("/all", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/:uuid", async (req: Request, res: Response) => {
+router.get("/:uuid", async (req: Request, res: Response<RGDraft>) => {
   const UUID = req.params.uuid as string;
   try {
-    const result = await client.hgetall(`draft:${UUID}`);
-    console.log("fetching from redis...");
+    const result = (await client.hgetall(
+      `draft:${UUID}`,
+    )) as unknown as IDraftDetails;
     res.status(200).json({ msg: "OK", draft: result });
   } catch (error) {
     // if not found in redis, check for database
@@ -40,7 +50,7 @@ router.get("/:uuid", async (req: Request, res: Response) => {
       const { title, content } = draft.dataValues;
 
       await client.hset(`draft_key:${UUID}`, {
-        lastUpdated: Date.now().toString(),
+        updatedAt: new Date().toString(),
       });
       await client.hset(`draft:${UUID}`, { title, content });
       res.status(200).json({ msg: "OK", draft: { title, content } });
@@ -54,9 +64,32 @@ router.get("/:uuid", async (req: Request, res: Response) => {
   }
 });
 
+router.get(
+  "/:uuid/updatedAt",
+  async (req: Request, res: Response<RGDraftUpdatedAt>) => {
+    const UUID = req.params.uuid as string;
+    try {
+      const result = await client.hgetall(`draft_key:${UUID}`);
+      res.status(200).json({ msg: "OK", updatedAt: result.updatedAt });
+    } catch (error) {
+      try {
+        const result = await Draft.findByPk(UUID, {
+          attributes: ["updatedAt"],
+        });
+        res
+          .status(200)
+          .json({ msg: "OK", updatedAt: result?.dataValues.updatedAt });
+      } catch (error) {
+        console.error(error);
+      }
+      console.error(error);
+    }
+  },
+);
+
 // creating a new draft
 // We will never create a new post, we only create a draft
-router.post("/new", async (req: Request, res: Response) => {
+router.post("/new", async (req: Request, res: Response<RPNewDraft>) => {
   // get the data
   const { title, content } = req.body as {
     title: string;
@@ -78,13 +111,13 @@ router.post("/new", async (req: Request, res: Response) => {
     // create a draft_key and also a draft
     try {
       await client.hset(`draft_key:${uuid}`, {
-        lastUpdated: Date.now().toString(),
+        updatedAt: new Date().toUTCString(),
       });
       await client.hset(`draft:${uuid}`, {
         title,
         content,
       });
-      await client.expire(`draft_key:${uuid}`, 300);
+      await client.expire(`draft_key:${uuid}`, 3600);
       res
         .status(200)
         .json({ msg: "Successfully created the draft.", post_id: uuid });
@@ -104,7 +137,7 @@ router.post("/new", async (req: Request, res: Response) => {
 });
 
 // publish a draft
-router.post("/publish/:uuid", async (req: Request, res: Response) => {
+router.post("/publish/:uuid", async (req: Request, res: Response<RCasual>) => {
   const uuid = req.params.uuid as string;
 
   // find the draft and then convert it into a post
@@ -132,7 +165,7 @@ router.post("/publish/:uuid", async (req: Request, res: Response) => {
 });
 
 // update an existing draft
-router.put("/:uuid", async (req: Request, res: Response) => {
+router.put("/:uuid", async (req: Request, res: Response<RCasual>) => {
   // first find the post to be updated
   const UUID = req.params.uuid as string;
   const newTitle = req.body.title as string;
@@ -170,7 +203,7 @@ router.put("/:uuid", async (req: Request, res: Response) => {
 });
 
 // delete a draft
-router.delete("/:uuid", async (req: Request, res: Response) => {
+router.delete("/:uuid", async (req: Request, res: Response<RCasual>) => {
   // first find the post to be deleted
   const UUID: string = req.params.uuid as string;
 
