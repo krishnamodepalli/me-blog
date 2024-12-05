@@ -11,6 +11,7 @@ const useLogin = () => {
 
   const login = (code: string): Promise<number> => {
     return new Promise<number>((resolve, reject) => {
+      setLoading(true);
       api
         .post("/auth/verify", { code })
         .then((res) => {
