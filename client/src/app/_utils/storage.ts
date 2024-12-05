@@ -81,6 +81,18 @@ const getDraft = (id: string): IDraftLS | null => {
 };
 
 /**
+ * gets all the draft previews present in `drafts` in localStorage
+ * @returns IDraftsLS
+ */
+const getDraftPreviews = (): IDraftsLS | null => {
+  const draftPreviews = JSON.parse(
+    localStorage.getItem("drafts") as string,
+  ) as IDraftsLS;
+
+  return draftPreviews;
+};
+
+/**
  * Updates the draft in localStorage.
  *
  * Updates in both `draft:${id}` & `drafts`
@@ -105,7 +117,13 @@ const updateDraft = (id: string, draftDetails: IDraftDetails) => {
   const allDrafts = JSON.parse(
     localStorage.getItem("drafts") as string,
   ) as IDraftsLS;
-  allDrafts.drafts.filter((draft) => (draft.title = draftDetails.title));
+  allDrafts.drafts.map((draft) => {
+    if (draft.id === id) {
+      draft.title = draftDetails.title;
+    }
+    return draft;
+  });
+  localStorage.setItem("drafts", JSON.stringify(allDrafts));
 };
 
 /**
@@ -123,4 +141,11 @@ const setDraftPreviews = (draftPreviews: IPostPreview[], fetchedAt: Date) => {
   );
 };
 
-export { addDraft, removeDraft, getDraft, updateDraft, setDraftPreviews };
+export {
+  addDraft,
+  removeDraft,
+  getDraft,
+  getDraftPreviews,
+  updateDraft,
+  setDraftPreviews,
+};
