@@ -22,10 +22,14 @@ const client = new Redis(process.env.REDIS_URI as string);
         const { title, content } = await client.hgetall(`draft:${uuid}`);
 
         // updating the draft in the database
-        const draft = (await Draft.findByPk(uuid)) as Draft;
-        draft.update({ title, content });
         try {
-          client.del(`draft:${uuid}`);
+          const draft = (await Draft.findByPk(uuid)) as Draft;
+          draft.update({ title, content });
+          try {
+            client.del(`draft:${uuid}`);
+          } catch (e) {
+            console.error(e);
+          }
         } catch (e) {
           console.error(e);
         }

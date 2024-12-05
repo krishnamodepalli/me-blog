@@ -12,6 +12,9 @@ export interface IPost {
   updatedAt: string;
 }
 
+export type { IPost as IDraft };
+export type { IPostPreview as IDraftPreview };
+
 export interface IDraftDetails {
   title: string;
   content: string;
@@ -27,6 +30,3 @@ export interface IDraftsLS {
   drafts: IPostPreview[];
   fetchedAt: string;
 }
-
-export type { IPost as IDraft };
-export type { IPostPreview as IDraftPreview };

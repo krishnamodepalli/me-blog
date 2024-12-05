@@ -1,5 +1,5 @@
 import getAllPosts, { getPost } from "@/app/_utils/getPosts";
-import myMDParser from "../../_utils/markParser";
+import myMDParser from "@/app/_utils/markParser";
 
 const PostPage = async ({ params }: { params: { post_uuid: string } }) => {
   const { post_uuid } = params;
