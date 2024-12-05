@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 
 import { ToastContainer } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 
 import { raleway } from "./_fonts";
 import "./globals.css";
 import "./blog-styles.css";
 import "./codeblock.css";
+import TopNotes from "@/components/TopNotes";
 
 export const metadata: Metadata = {
   title: "Me Blog | Krishna Modepalli",
@@ -37,6 +38,7 @@ export default function RootLayout({
 }
 `}
         </style>
+        <TopNotes />
         <main
           className={`${raleway.className} relative m-auto min-h-[800px] max-w-[1000px] pt-20`}
         >
