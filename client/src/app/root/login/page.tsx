@@ -20,9 +20,9 @@ const LoginPage = () => {
 
   return (
     <div
-      className={`flex h-screen w-full items-center justify-center ${raleway.className}`}
+      className={`flex w-full items-center justify-center ${raleway.className}`}
     >
-      <div className="bg-bg2 flex w-[400px] flex-col rounded-lg py-4 shadow-lg">
+      <div className="mt-[min(30%,_600px)] flex w-[400px] flex-col rounded-lg bg-bg2 py-4 shadow-lg">
         <h2 className="px-[5%] text-xl tracking-wide text-t1">
           Please input your TOPT code:
         </h2>
@@ -31,18 +31,19 @@ const LoginPage = () => {
           onChange={setOTP}
           numInputs={8}
           skipDefaultStyles
+          shouldAutoFocus
           renderInput={(props) => <input {...props} />}
-          inputStyle={`px-[6px] bg-bg1 focus:border-t1 border-2 border-dim text-xl text-t1 rounded-md w-7 h-9`}
+          inputStyle="w-5 bg-transparent text-center border-b border-neutral-500 focus:border-neutral-200 pb-[2px] [&:nth-child(4)]:mr-4 outline-none text-2xl font-bold"
           containerStyle={"flex justify-center gap-4 mt-8"}
         />
         <button
           onClick={handleLogin}
           disabled={loading}
-          className="mx-auto mb-4 mt-10 w-[90%] rounded-lg border-2 border-transparent bg-blue-500 py-[5px] text-2xl text-t1 shadow-md outline-none transition-all duration-300 hover:bg-bg1 focus:bg-bg1 focus:text-t1 disabled:cursor-not-allowed disabled:bg-gray-600 disabled:text-t2 disabled:shadow-none"
+          className="mx-auto my-4 mt-8 w-[90%] rounded-md border-none bg-primary py-2 font-bold tracking-wider text-black outline-none outline-offset-2 hover:brightness-110 focus:outline-1 focus:outline-primary disabled:cursor-not-allowed disabled:bg-gray-600 disabled:text-gray-800 disabled:hover:brightness-100"
         >
-          Login
+          {loading ? "Logging In" : "Login"}
         </button>
-        <p className="text-center tracking-wide text-red-500">{error}</p>
+        <p className="text-center tracking-wide text-rose-500">{error}</p>
       </div>
     </div>
   );
