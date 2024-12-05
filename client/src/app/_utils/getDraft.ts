@@ -1,16 +1,8 @@
-import axios from "axios";
-
+import { root_api } from "@/app/_utils/apis";
 import { IDraft } from "../_types";
 
-const getDraft = async (token: string, uuid: string): Promise<IDraft> => {
-  const { data } = await axios.get(
-    `${process.env.NEXT_PUBLIC_API_URL}/draft/${uuid}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  );
+const getDraft = async (uuid: string): Promise<IDraft> => {
+  const { data } = await root_api.get(`/draft/${uuid}`);
   const draft = data.draft as IDraft;
   return draft;
 };

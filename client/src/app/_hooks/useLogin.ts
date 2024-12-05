@@ -1,7 +1,7 @@
 import { useState } from "react";
-import axios from "axios";
 import Cookies from "js-cookie";
 
+import { api } from "@/app/_utils/apis";
 import useAuth from "./useAuth";
 
 const useLogin = () => {
@@ -11,10 +11,8 @@ const useLogin = () => {
 
   const login = (code: string): Promise<number> => {
     return new Promise<number>((resolve, reject) => {
-      axios
-        .post(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify`, {
-          code,
-        })
+      api
+        .post("/auth/verify", { code })
         .then((res) => {
           if (res.status === 200) {
             console.log(res);

@@ -3,14 +3,13 @@
 
 import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
-import Cookies from "js-cookie";
 
 import Each from "./utils/Each";
 
 import formatDate from "@/app/_utils/formatDate";
 import { IPostPreview } from "@/app/_types";
 import { montserrat } from "@/app/_fonts";
-import axios from "axios";
+import { api } from "@/app/_utils/apis";
 import myMDParser from "@/app/_utils/markParser";
 
 const PostPreview = ({
@@ -42,31 +41,20 @@ const PostPreview = ({
 };
 
 const PostList = () => {
-  const token = Cookies.get("token") as string;
-
   const [posts, setPosts] = useState<IPostPreview[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  const fetchPosts = useCallback(
-    async (pageNumber: number) => {
-      const { data } = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/post/all`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params: {
-            page_no: pageNumber,
-            limit: 1,
-          },
-        },
-      );
-      return data.posts;
-    },
-    [token],
-  );
+  const fetchPosts = useCallback(async (pageNumber: number) => {
+    const { data } = await api.get("/post/all", {
+      params: {
+        page_no: pageNumber,
+        limit: 1,
+      },
+    });
+    return data.posts;
+  }, []);
 
   useEffect(() => {
     const loadPosts = async () => {

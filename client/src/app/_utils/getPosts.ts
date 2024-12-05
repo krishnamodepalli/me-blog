@@ -1,16 +1,16 @@
-import axios from "axios";
+import { api } from "./apis";
 
 import { IPost, IPostPreview } from "../_types";
 
 export const getPost = async (uuid: string): Promise<IPost> => {
-  const { data } = await axios.get(
+  const { data } = await api.get(
     `${process.env.NEXT_PUBLIC_API_URL}/post/${uuid}`,
   );
   return data as IPost;
 };
 
 const getAllPosts = async (): Promise<IPostPreview[]> => {
-  const { data } = await axios.get(
+  const { data } = await api.get(
     `${process.env.NEXT_PUBLIC_API_URL}/post/all`,
     {
       params: {

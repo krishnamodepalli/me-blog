@@ -1,16 +1,13 @@
 "use client";
 import { useRouter } from "next/navigation";
-import axios from "axios";
-import Cookies from "js-cookie";
 
+import { root_api } from "@/app/_utils/apis";
 import { jetbrains } from "@/app/_fonts";
 import { useCallback, useEffect, useState, useRef } from "react";
 import { addDraft } from "@/app/_utils/storage";
 
 const Page = () => {
   const router = useRouter();
-
-  const token = Cookies.get("token") as string;
 
   const [editingData, setEditingData] = useState({
     title: "",
@@ -20,12 +17,8 @@ const Page = () => {
 
   const createDraft = useCallback(() => {
     if (editingData.title.length < 2 || editingData.content.length < 2) return;
-    axios
-      .post(`${process.env.NEXT_PUBLIC_API_URL}/draft/new`, editingData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+    root_api
+      .post(`${process.env.NEXT_PUBLIC_API_URL}/draft/new`, editingData)
       .then((res) => {
         if (res.status === 200) {
           const { data } = res;
@@ -43,7 +36,7 @@ const Page = () => {
       .catch((e) => {
         console.error(e);
       });
-  }, [token, editingData, router]);
+  }, [editingData, router]);
 
   useEffect(() => {
     if (timeoutRef.current) {

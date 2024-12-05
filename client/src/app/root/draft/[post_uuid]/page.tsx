@@ -1,20 +1,22 @@
 "use client";
-import axios from "axios";
-import Cookies from "js-cookie";
+
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-
 import { toast } from "react-toastify";
 
+import { root_api } from "@/app/_utils/apis";
 import myMDParser from "@/app/_utils/markParser";
 
 import "highlight.js/styles/github-dark.min.css";
+import { getDraft } from "@/app/_utils/storage";
 
 const Page = ({ params }: { params: { post_uuid: string } }) => {
   const { post_uuid } = params;
   const path = usePathname();
   const router = useRouter();
+
+  const [loading, setLoading] = useState<boolean>(true);
 
   const blogContentRef = useRef<HTMLDivElement | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -26,38 +28,31 @@ const Page = ({ params }: { params: { post_uuid: string } }) => {
     content: "",
   });
 
+  // Get the draft from localStorage
   useEffect(() => {
-    const html = myMDParser.parse(editingData.content || "") as string;
-    const blogContentDiv = blogContentRef.current;
-    if (blogContentDiv) {
-      blogContentDiv.innerHTML = html;
-    }
-  }, [editingData]);
+    setLoading(true);
+    const data = getDraft(post_uuid);
+    if (!data) return;
+    const { draft } = data;
 
-  useEffect(() => {
-    const draftData =
-      JSON.parse(localStorage.getItem(`draft:${post_uuid}`) as string) || {};
-    if (Object.keys(draftData).length === 0) return;
-    const draft = draftData.draft;
     setEditingData({
       title: draft.title,
       content: draft.content,
     });
   }, [post_uuid]);
 
+  // render the draft data from localStorage
+  useEffect(() => {
+    const html = myMDParser.parse(editingData.content || "") as string;
+    const blogContentDiv = blogContentRef.current;
+    if (blogContentDiv) blogContentDiv.innerHTML = html;
+    setLoading(false);
+  }, [editingData]);
+
   const publishPost = useCallback(() => {
-    const token = Cookies.get("token") as string;
     setIsLoading(true);
-    axios
-      .post(
-        `${process.env.NEXT_PUBLIC_API_URL}/draft/publish/${post_uuid}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      )
+    root_api
+      .post(`/draft/publish/${post_uuid}`, {})
       .then(() => {
         toast.success("Your draft is successfully published.", {
           theme: "colored",
@@ -76,6 +71,32 @@ const Page = ({ params }: { params: { post_uuid: string } }) => {
       })
       .finally(() => setIsLoading(false));
   }, [post_uuid, router]);
+
+  if (loading)
+    return (
+      <div className="my-20 animate-pulse">
+        <p className="mb-8 h-20 rounded-md bg-bg2"></p>
+        <div className="mb-8 flex justify-end">
+          <p className="h-12 w-40 rounded-md bg-bg2"></p>
+        </div>
+        <div className="my-8">
+          <p className="mb-2 h-5 rounded-sm bg-bg2"></p>
+          <p className="mb-2 h-5 rounded-sm bg-bg2"></p>
+          <p className="h-5 w-[80%] rounded-sm bg-bg2"></p>
+        </div>
+        <div className="my-8">
+          <p className="mb-2 h-5 rounded-sm bg-bg2"></p>
+          <p className="mb-2 h-5 rounded-sm bg-bg2"></p>
+          <p className="h-5 w-[80%] rounded-sm bg-bg2"></p>
+        </div>
+        <div className="my-8">
+          <p className="mb-2 h-5 rounded-sm bg-bg2"></p>
+          <p className="mb-2 h-5 rounded-sm bg-bg2"></p>
+          <p className="h-5 w-[80%] rounded-sm bg-bg2"></p>
+        </div>
+        <p className="h-12 w-full bg-bg2"></p>
+      </div>
+    );
 
   return (
     <div className="mb-40">
