@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 
+import { redirect } from "@/app/_hooks/useRedirectInNSec";
 import { root_api } from "@/app/_utils/apis";
 import myMDParser from "@/app/_utils/markParser";
 
@@ -14,7 +15,6 @@ import { getDraft } from "@/app/_utils/storage";
 const Page = ({ params }: { params: { post_uuid: string } }) => {
   const { post_uuid } = params;
   const path = usePathname();
-  const router = useRouter();
 
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -58,9 +58,7 @@ const Page = ({ params }: { params: { post_uuid: string } }) => {
           theme: "colored",
           autoClose: 3000,
         });
-        setTimeout(() => {
-          router.push(`/`);
-        }, 4000);
+        if (redirect) redirect(3, "/");
       })
       .catch((err) => {
         toast.error("Cannot publish the draft. Please try again later.", {
@@ -70,7 +68,7 @@ const Page = ({ params }: { params: { post_uuid: string } }) => {
         console.log(err);
       })
       .finally(() => setIsLoading(false));
-  }, [post_uuid, router]);
+  }, [post_uuid]);
 
   if (loading)
     return (

@@ -4,11 +4,13 @@ import { usePathname } from "next/navigation";
 import TopNote, { TopNoteContainer } from "@/components/utils/TopNote";
 
 import useIsOnline from "@/app/_hooks/useIsOnline";
+import useRedirectInNSec from "@/app/_hooks/useRedirectInNSec";
 
 const TopNotes = () => {
   const pathname = usePathname();
 
   const { isOnline } = useIsOnline();
+  const { time, active: redirectActive } = useRedirectInNSec();
 
   return (
     <TopNoteContainer>
@@ -28,6 +30,9 @@ const TopNotes = () => {
           online again.
         </TopNote>
       )}
+      <TopNote active={redirectActive} closable={false}>
+        You will be redirecting in {time} seconds...
+      </TopNote>
     </TopNoteContainer>
   );
 };

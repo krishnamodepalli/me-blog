@@ -1,3 +1,5 @@
+import { SetStateAction } from "react";
+
 export interface IPostPreview {
   id: string;
   title: string;
@@ -28,5 +30,10 @@ export interface IDraftsLS {
   fetchedAt: string;
 }
 
+type rstate<T> = [state: T, setState: React.Dispatch<SetStateAction<T>>];
+type rref<T> = React.MutableRefObject<T>;
+
 export type { IPost as IDraft };
 export type { IPostPreview as IDraftPreview };
+
+export type { rstate, rref };
