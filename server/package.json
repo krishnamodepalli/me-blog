@@ -4,9 +4,11 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon --env-file=.env.dev dist/server.js"
+    "start": "node --env-file=.env.dev dist/server.js",
+    "dev": "nodemon --env-file=.env.dev dist/server.js",
+    "build": "tsc"
   },
-  "author": "",
+  "author": "Krishna Modepalli",
   "license": "ISC",
   "dependencies": {
     "@types/cors": "^2.8.17",
