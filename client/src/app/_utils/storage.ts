@@ -1,11 +1,24 @@
 import {
-  IDraftDetails,
   IDraft,
-  IPostPreview,
+  IDraftDetails,
   IDraftLS,
+  IDraftPreview,
   IDraftsLS,
+  IPostPreview,
 } from "../_types";
 import draftToPreview from "./draftToPreview";
+
+/**
+ * This will check if the localStorage have a draft with the given id
+ * @param id The id of the draft to check for availability
+ */
+const isDraftAvailable = (id: string): boolean => {
+  const data = JSON.parse(
+    localStorage.getItem(`draft:${id}`) as string,
+  ) as IDraftLS;
+
+  return !!data;
+};
 
 /**
  * To add a new draft to localStorage.
@@ -16,9 +29,11 @@ import draftToPreview from "./draftToPreview";
 const addDraft = (draft: IDraft) => {
   const post_uuid: string = draft.id;
 
+  if (isDraftAvailable(post_uuid))  return;
+
   // Adding `draft:${id}` to localStorage
   localStorage.setItem(
-    `darft:${post_uuid}`,
+    `draft:${post_uuid}`,
     JSON.stringify({
       draft: {
         title: draft.title,
@@ -33,9 +48,11 @@ const addDraft = (draft: IDraft) => {
   const allDrafts = JSON.parse(
     localStorage.getItem("drafts") as string,
   ) as IDraftsLS;
-  console.log(allDrafts);
 
-  if (allDrafts) allDrafts.drafts.push(draft as unknown as IPostPreview);
+  if (allDrafts)
+    allDrafts.drafts.push({
+      ...draft,
+    } as IDraftPreview);
 
   localStorage.setItem(
     "drafts",
@@ -52,6 +69,8 @@ const addDraft = (draft: IDraft) => {
  * @param id Id of the draft to remove from localStorage
  */
 const removeDraft = (id: string) => {
+  if (!isDraftAvailable(id))  return;
+
   localStorage.removeItem(`draft:${id}`);
   const allDrafts = JSON.parse(
     localStorage.getItem("drafts") as string,
@@ -73,11 +92,7 @@ const removeDraft = (id: string) => {
  * @returns draft of type `IDraftLS`
  */
 const getDraft = (id: string): IDraftLS | null => {
-  const draft = JSON.parse(
-    localStorage.getItem(`draft:${id}`) as string,
-  ) as IDraftLS;
-
-  return draft;
+  return JSON.parse(localStorage.getItem(`draft:${id}`) as string) as IDraftLS;
 };
 
 /**
@@ -85,11 +100,7 @@ const getDraft = (id: string): IDraftLS | null => {
  * @returns IDraftsLS
  */
 const getDraftPreviews = (): IDraftsLS | null => {
-  const draftPreviews = JSON.parse(
-    localStorage.getItem("drafts") as string,
-  ) as IDraftsLS;
-
-  return draftPreviews;
+  return JSON.parse(localStorage.getItem("drafts") as string) as IDraftsLS;
 };
 
 /**
@@ -142,6 +153,7 @@ const setDraftPreviews = (draftPreviews: IPostPreview[], fetchedAt: Date) => {
 };
 
 export {
+  isDraftAvailable,
   addDraft,
   removeDraft,
   getDraft,

@@ -5,6 +5,7 @@ import { ReactNode, useEffect } from "react";
 import { getDraft as getDraftFromLocal, addDraft } from "@/app/_utils/storage";
 import getDraft from "@/app/_utils/getDraft";
 import { root_api } from "@/app/_utils/apis";
+import { IDraft } from "@/app/_types";
 
 const Layout = ({
   children,
@@ -27,7 +28,7 @@ const Layout = ({
       const localDraft = getDraftFromLocal(post_uuid);
 
       if (!localDraft) {
-        const data = await getDraft(post_uuid);
+        const data: IDraft = await getDraft(post_uuid);
         addDraft(data);
       } else {
         const { data } = await root_api.get(`/draft/${post_uuid}/updatedAt`);

@@ -9,7 +9,7 @@ import Each from "@/components/utils/Each";
 import { differenceInHours } from "date-fns";
 import { root_api } from "@/app/_utils/apis";
 import { montserrat } from "@/app/_fonts";
-import { IPostPreview } from "@/app/_types";
+import { IPostPreview, rstate } from "@/app/_types";
 import {
   getDraftPreviews,
   removeDraft,
@@ -36,8 +36,10 @@ const LoadingDraft = () => (
 );
 
 const Page = () => {
-  const [drafts, setDrafts] = useState<IPostPreview[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [drafts, setDrafts]: rstate<IPostPreview[]> = useState<IPostPreview[]>(
+    [],
+  );
+  const [loading, setLoading]: rstate<boolean> = useState(true);
 
   /**
    * Checking for the drafts (IPostPreviews) in the localStorage.
