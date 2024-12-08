@@ -15,13 +15,13 @@ export interface IPost {
 export type { IPost as IDraft };
 export type { IPostPreview as IDraftPreview };
 
-export interface IDraftDetails {
+export interface IDraftContents {
   title: string;
   content: string;
 }
 
 export interface IDraftLS {
-  draft: IDraftDetails;
+  draft: IDraftContents;
   updatedAt: string;
   fetchedAt: string;
 }

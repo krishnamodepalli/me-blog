@@ -9,7 +9,8 @@ import {
   RGDraftUpdatedAt,
   RPNewDraft,
 } from "../types/response";
-import { IDraftDetails, IDraftPreview } from "../types";
+import { IDraft, IDraftContents, IDraftPreview } from "../types";
+import { addDraft, getDraft, updateDraft, deleteDraft } from "../utils/redis";
 
 const router = Router();
 
@@ -38,30 +39,52 @@ router.get("/all", async (req: Request, res: Response<RGAllDrafts>) => {
 
 router.get("/:uuid", async (req: Request, res: Response<RGDraft>) => {
   const UUID = req.params.uuid as string;
-  try {
-    const result = (await client.hgetall(
-      `draft:${UUID}`,
-    )) as unknown as IDraftDetails;
-    res.status(200).json({ msg: "OK", draft: result });
-  } catch (error) {
-    // if not found in redis, check for database
+  // try to get the draft from REDIS
+  const draft = await getDraft(UUID);
+  if (draft)
+    res.status(200).json({ msg: "OK", draft });
+  else {
+    // get the draft from database and add it to REDIS
     try {
-      const draft = (await Draft.findByPk(UUID)) as Draft;
-      const { title, content } = draft.dataValues;
+      const draft = await Draft.findByPk(UUID);
+      if (!draft) {
+        res.status(404).json({ msg: `Cannot find the draft with id ${UUID}` });
+        return;
+      }
+      const { id, title, content, createdAt, updatedAt } = draft.dataValues;
+      const data = { id, title, content, createdAt, updatedAt } as IDraft;
+      const status = await addDraft(data);
 
-      await client.hset(`draft_key:${UUID}`, {
-        updatedAt: new Date().toString(),
-      });
-      await client.hset(`draft:${UUID}`, { title, content });
-      res.status(200).json({ msg: "OK", draft: { title, content } });
-    } catch (e) {
-      res.status(404).json({ msg: "Draft not found" });
+      res.status(200).json({ msg: "OK", draft: data });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ msg: "Unable to fetch draft, please try again later. " });
+      console.error("Error while fetching a draft from database\n" + error);
     }
-    res
-      .status(500)
-      .json({ msg: "Unable to fetch draft, please try again later. " });
-    console.error("Error while sending a draft on GET request");
   }
+
+  // try {
+  // } catch (error) {
+  //   // if not found in redis, check for database
+  //   try {
+  //     const draft = (await Draft.findByPk(UUID)) as Draft;
+  //     const { title, content, createdAt } = draft.dataValues;
+  //
+  //     await client.hset(`draft_key:${UUID}`, {
+  //       createdAt,
+  //       updatedAt: new Date().toUTCString(),
+  //     });
+  //     await client.hset(`draft:${UUID}`, { title, content });
+  //     res.status(200).json({ msg: "OK", draft: { title, content } });
+  //   } catch (e) {
+  //     res.status(404).json({ msg: "Draft not found" });
+  //   }
+  //   res
+  //     .status(500)
+  //     .json({ msg: "Unable to fetch draft, please try again later. " });
+  //   console.error("Error while sending a draft on GET request");
+  // }
 });
 
 router.get(
@@ -76,9 +99,11 @@ router.get(
         const result = await Draft.findByPk(UUID, {
           attributes: ["updatedAt"],
         });
+        if (result)
         res
           .status(200)
-          .json({ msg: "OK", updatedAt: result?.dataValues.updatedAt });
+          .json({ msg: "OK", updatedAt: result.dataValues.updatedAt });
+        else res.status(404).json({ msg: `No draft exists with id ${UUID}.` });
       } catch (error) {
         console.error(error);
       }
@@ -111,6 +136,7 @@ router.post("/new", async (req: Request, res: Response<RPNewDraft>) => {
     // create a draft_key and also a draft
     try {
       await client.hset(`draft_key:${uuid}`, {
+        createdAt: new Date().toUTCString(),
         updatedAt: new Date().toUTCString(),
       });
       await client.hset(`draft:${uuid}`, {
@@ -138,67 +164,44 @@ router.post("/new", async (req: Request, res: Response<RPNewDraft>) => {
 
 // publish a draft
 router.post("/publish/:uuid", async (req: Request, res: Response<RCasual>) => {
-  const uuid = req.params.uuid as string;
+  const UUID = req.params.uuid as string;
 
-  // find the draft and then convert it into a post
-  // get the latest data from the redis server
-  const redisDraft = await client.hgetall(`draft:${uuid}`);
-  const draft = (await Draft.findByPk(uuid)) as Draft;
-
-  if (redisDraft)
-    // update the draft with latest data
-    await draft.update({
-      title: redisDraft.title,
-      content: redisDraft.content,
-    });
-
-  try {
-    await draft.convertToPost();
-    res.status(200).json({ msg: "Successfully published the post." });
-    // after this, we need to delete the draft from redis
-    await client.del(`draft:${uuid}`);
-  } catch (e) {
-    res
-      .status(500)
-      .json({ msg: "Cannot publish the post. Please try again later." });
+  const redis_draft = await getDraft(UUID);
+  const database_draft = await Draft.findByPk(UUID);
+  if (redis_draft && database_draft) {
+    try {
+      await database_draft.convertToPost();
+      await deleteDraft(UUID);
+      res.status(200).json({ msg: "Successfully published the post." });
+    } catch (error) {
+      res.status(500).json({ msg: "Cannot publish the draft!! Please try again later" });
+      console.error("Cannot publish the draft.\n" + error);
+    }
   }
 });
 
 // update an existing draft
 router.put("/:uuid", async (req: Request, res: Response<RCasual>) => {
-  // first find the post to be updated
+  /**
+   * 1. Get the data to update
+   * 2. Check if draft is still in redis
+   *    - If yes, just update over there
+   *    - If not, fetch the draft from database and bring it to redis
+   */
+
+    // first find the post to be updated
   const UUID = req.params.uuid as string;
   const newTitle = req.body.title as string;
   const newContent = req.body.content as string;
 
-  // first we need to connect to the `redis` and check if redis already have this draft.
-  const redis_res = await client.hset(`draft:${UUID}`, {
+  const status = await updateDraft(UUID, {
     title: newTitle,
     content: newContent,
   });
-  if (redis_res === 0) {
-    // there exists the draft and we successfully updated in the redis server
-    res.status(200).json({ msg: "content is updated" });
-    return;
-  }
-  // if not, (there is possibility for this case... BUT STILL)
-
-  const draft = (await Draft.findByPk(UUID)) as Draft;
-  if (!draft) {
-    res.status(404).json({
-      msg: "Cannot find the post to delete",
-    });
-    return;
-  }
-
-  try {
-    draft.update({ content: newContent }); // no need to call `save()`
-    res.status(200).json({ msg: "content is updated" });
-  } catch (err) {
-    console.error("An error occurred while updating a draft\n" + err);
-    res.status(500).json({
-      msg: "System has encountered some error, please try again later",
-    });
+  if (status) {
+    res.status(200).json({ msg: "OK" });
+  } else {
+    res.status(500).json({ msg: "Cannot update the draft!!" });
   }
 });
 
@@ -207,26 +210,16 @@ router.delete("/:uuid", async (req: Request, res: Response<RCasual>) => {
   // first find the post to be deleted
   const UUID: string = req.params.uuid as string;
 
-  const draft = await Draft.findByPk(UUID);
-  if (!draft) {
-    res.status(200).json({ msg: "Successfully deleted the draft." });
-    return;
-  }
-
-  try {
-    draft?.destroy();
-    // also delete from REDIS, iff exists
+  const status = await deleteDraft(UUID);
+  if (status) {
     try {
-      client.del(`draft_key:${UUID}`);
-      client.del(`draft:${UUID}`);
-    } catch (e) {
-      console.error(e);
+      const draft = await Draft.findByPk(UUID);
+      if (draft) await draft.destroy();
+      res.status(200).json({ msg: "OK" });
+    } catch (error) {
+      console.error("Cannot delete the draft\n" + error);
+      res.status(500).json({ msg: "Cannot delete the draft!!" });
     }
-    res.status(200).json({ msg: "Successfully deleted the draft." });
-  } catch (err) {
-    res.status(500).json({
-      msg: "System has encountered some error, please try again later",
-    });
   }
 });
 

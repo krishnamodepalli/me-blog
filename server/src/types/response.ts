@@ -1,4 +1,4 @@
-import { IDraftDetails, IPost, IPostPreview } from ".";
+import { IDraft, IPost, IPostPreview } from ".";
 
 export interface RCasual {
   msg: string;
@@ -11,7 +11,7 @@ export interface RGAllDrafts {
 
 export interface RGDraft {
   msg: string;
-  draft?: IDraftDetails;
+  draft?: IDraft;
 }
 
 export interface RGPost {
